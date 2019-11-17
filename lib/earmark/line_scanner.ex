@@ -51,8 +51,6 @@ defmodule Earmark.LineScanner do
   # proceeding
 
   # (_,atom() | tuple() | #{},_) -> ['Elixir.B']
-  def scan_lines(lines, options \\ %Options{}, recursive \\ false)
-
   def scan_lines(lines, options, recursive) do
     lines_with_count(lines, options.line - 1)
     |> get_mapper(options).(fn line -> type_of(line, options, recursive) end)
@@ -61,10 +59,6 @@ defmodule Earmark.LineScanner do
   defp lines_with_count(lines, offset) do
     Enum.zip(lines, offset..(offset + Enum.count(lines)))
   end
-
-  def type_of(line, recursive)
-      when is_boolean(recursive),
-      do: type_of(line, %Options{}, recursive)
 
   def type_of({line, lnb}, options = %Options{}, recursive) do
     line = line |> Helpers.expand_tabs() |> Helpers.remove_line_ending()
@@ -119,7 +113,7 @@ defmodule Earmark.LineScanner do
 
       #   Although no block tags I still think they should close a preceding para as do many other
       #   implementations.
-      (match = Regex.run(@void_tag_rgx, line)) && !recursive ->
+      (match = Regex.run(@void_tag_rgx, line)) ->
         [_, tag] = match
 
         %Line.HtmlOneLine{tag: tag, content: line}

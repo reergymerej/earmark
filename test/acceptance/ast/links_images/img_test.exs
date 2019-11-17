@@ -2,6 +2,7 @@ defmodule Acceptance.Ast.LinkImages.ImgTest do
   use ExUnit.Case, async: true
 
   import Support.Helpers, only: [as_ast: 1, parse_html: 1]
+  import Support.AstHelpers, only: [ast: 1, para: 1, para!: 1]
 
   @moduletag :ast
 
@@ -9,30 +10,24 @@ defmodule Acceptance.Ast.LinkImages.ImgTest do
 
     test "img with title" do
       markdown = "[foo]: /url \"title\"\n\n![foo]\n"
-      html = "<p><img src=\"/url\" alt=\"foo\" title=\"title\"/></p>\n"
-      ast      = parse_html(html)
-      messages = []
+      ast      = para!({:img, [src: "/url", alt: "foo", title: "title"], []})
 
-      assert as_ast(markdown) == {:ok, [ast], messages}
+      assert as_ast(markdown) == ast
     end
 
     test "url encoding is **not** our job" do
       markdown = "[foo]: /url?é=42 \"title\"\n\n![foo]\n"
-      html = "<p><img src=\"/url?é=42\" alt=\"foo\" title=\"title\" /></p>\n"
-      ast      = parse_html(html)
-      messages = []
+      ast      = para!({:img, [src: "/url?é=42", alt: "foo", title: "title"], []})
 
-      assert as_ast(markdown) == {:ok, [ast], messages}
+      assert as_ast(markdown) == ast
     end
 
 
     test "this ain't no img (and no link)" do
       markdown = "[foo]: /url \"title\"\n\n![bar]\n"
-      html = "<p>![bar]</p>\n"
-      ast      = parse_html(html)
-      messages = []
+      ast      = para!("![bar]")
 
-      assert as_ast(markdown) == {:ok, [ast], messages}
+      assert as_ast(markdown) == ast
     end
 
   end
@@ -41,37 +36,34 @@ defmodule Acceptance.Ast.LinkImages.ImgTest do
 
     test "as with this img" do
       markdown = "![[text](inner)](outer)"
-      html = "<p><img src=\"outer\" alt=\"[text](inner)\"/></p>\n"
-      ast      = parse_html(html)
-      messages = []
+      # html = "<p><img src=\"outer\" alt=\"[text](inner)\"/></p>\n"
+      ast      = para!({:img, [src: "outer", alt: "[text](inner)"], []})
 
-      assert as_ast(markdown) == {:ok, [ast], messages}
+      assert as_ast(markdown) == ast
     end
 
     test "again escapes do not escape us" do
       markdown = "![\\[text\\](inner)](outer)"
-      html = "<p><img src=\"outer\" alt=\"[text](inner)\"/></p>\n"
-      ast      = parse_html(html)
-      messages = []
+      # html = "<p><img src=\"outer\" alt=\"[text](inner)\"/></p>\n"
+      ast      = para!({:img, [src: "outer", alt: "[text](inner)"], []})
 
-      assert as_ast(markdown) == {:ok, [ast], messages}
+      assert as_ast(markdown) == ast
     end
 
     test "headaches ahead (and behind us)" do
       markdown = "[![moon](moon.jpg)](/uri)\n"
-      html = "<p><a href=\"/uri\"><img src=\"moon.jpg\" alt=\"moon\"/></a></p>\n"
-      ast      = parse_html(html)
-      messages = []
+      # html = "<p><a href=\"/uri\"><img src=\"moon.jpg\" alt=\"moon\"/></a></p>\n"
+      ast      = para!({:a, [href: "/uri"], {:img, [src: "moon.jpg", alt: "moon"], []}})
 
-      assert as_ast(markdown) == {:ok, [ast], messages}
+      assert as_ast(markdown) == ast
     end
 
     test "lost in space" do
       markdown = "![![moon](moon.jpg)](sun.jpg)\n"
-      html = "<p><img src=\"sun.jpg\" alt=\"![moon](moon.jpg)\"/></p>\n"
-      ast      = parse_html(html)
-      messages = []
-      assert as_ast(markdown) == {:ok, [ast], messages}
+      # html = "<p><img src=\"sun.jpg\" alt=\"![moon](moon.jpg)\"/></p>\n"
+      ast      = para!({:img, [src: "sun.jpg", alt: "![moon](moon.jpg)"], []}) 
+
+      assert as_ast(markdown) == ast
     end
   end
 

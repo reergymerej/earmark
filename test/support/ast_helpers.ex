@@ -1,13 +1,15 @@
 defmodule Support.AstHelpers do
-  
+
   def ast_from_md(md) do
     with {:ok, ast, []} <- Earmark.as_ast(md), do: ast
   end
 
+
+  def ast(tag, content), do: ast({tag, [], content})
   def ast(content)
   def ast(content) when is_binary(content), do: [content]
   def ast(content) when is_tuple(content), do: _ast([content], [])
-  def ast(content) when is_atom(content), do: {to_string(content), [], []} 
+  def ast(content) when is_atom(content), do: {to_string(content), [], []}
   def ast(content), do: _ast(content, [])
 
   def ast!(content, messages\\[])

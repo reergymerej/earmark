@@ -61,7 +61,7 @@ defmodule Acceptance.Ast.LinkImages.ImgTest do
     test "lost in space" do
       markdown = "![![moon](moon.jpg)](sun.jpg)\n"
       # html = "<p><img src=\"sun.jpg\" alt=\"![moon](moon.jpg)\"/></p>\n"
-      ast      = para!({:img, [src: "sun.jpg", alt: "![moon](moon.jpg)"], []}) 
+      ast      = para!({:img, [src: "sun.jpg", alt: "![moon](moon.jpg)"], []})
 
       assert as_ast(markdown) == ast
     end

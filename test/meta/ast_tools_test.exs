@@ -5,7 +5,7 @@ defmodule Meta.AstToolsTest do
   @moduletag :meta
 
 
-  describe "cannonical ast creation" do 
+  describe "cannonical ast creation" do
     test "simplest case" do
       result = ast([{:p, [], ["hello"]}])
       expect = [{"p", [], ["hello"]}]
@@ -52,7 +52,7 @@ defmodule Meta.AstToolsTest do
       assert result == expect
     end
   end
-  
+
   describe "attributes as keyword lists" do
     test "are correctly formatted too" do
       result = ast({:p, [{"data-att", 42}, x: 44], "hello"})
@@ -92,7 +92,7 @@ defmodule Meta.AstToolsTest do
 
       assert result == expect
     end
-    
+
     test "and so does para!" do
       result = para!([a: 1], {:div, "hello"})
       expect = {:ok, [{"p", [{"a", "1"}], [{"div", [], ["hello"]}]}], []}

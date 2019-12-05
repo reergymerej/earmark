@@ -50,11 +50,9 @@ defmodule Earmark.Parser do
     |> parse_lines(options)
   end
 
-  @doc false
   # Given a list of `Line.xxx` structs, group them into related blocks.
   # Then extract any id definitions, and build a map from them. Not
   # for external consumption.
-
   def parse_lines(lines, options) do
     {blocks, options} = lines |> remove_trailing_blank_lines() |> lines_to_blocks(options)
     links  = links_from_blocks(blocks)
@@ -62,9 +60,8 @@ defmodule Earmark.Parser do
   end
 
   defp lines_to_blocks(lines, options) do
-    with {blocks, options1} <- lines |> _parse([], options) do
-      { blocks |> assign_attributes_to_blocks([]) |> consolidate_list_items([]), options1 }
-    end
+    {blocks, options1} = lines |> _parse([], options)
+    {blocks |> assign_attributes_to_blocks([]) |> consolidate_list_items([]), options1}
   end
 
 

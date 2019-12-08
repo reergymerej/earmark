@@ -27,13 +27,6 @@ defmodule Acceptance.Ast.ListAndBlockTest do
   end
 
   describe "Void Tags in Lists" do
-    test "is part of list" do
-      markdown = "- c\n    > d"
-      ast      = ast({:ul, {:li, ["a", :br]}}) |> IO.inspect
-      messages = []
-
-      assert as_ast(markdown) == {:ok, [ast], messages}
-    end
   end
   
 end

@@ -1,18 +1,50 @@
+# The mix file is where everything begins.
+# https://hexdocs.pm/mix/Mix.html
+
+# defmodule is a macro used to define a new module
+# https://elixir-lang.org/getting-started/modules-and-functions.html
+
+# do/end blocks are sugar built on keywords
+# https://elixir-lang.org/getting-started/case-cond-and-if.html#doend-blocks
+# https://elixir-lang.org/getting-started/keywords-and-maps.html
 defmodule Earmark.Mixfile do
+
+  # https://elixir-lang.org/getting-started/alias-require-and-import.html#use
+  # Allow Mix.Project to inject code into this module, used for extension.
+  # https://hexdocs.pm/mix/Mix.Project.html
   use Mix.Project
 
+  # These are module attributes.  Some are reserved for special usage, like
+  # @doc.  These are basically constants used across the module.
+  # https://elixir-lang.org/getting-started/module-attributes.html
   @version "1.4.4"
   @url "https://github.com/pragdave/earmark"
 
 
+  # This is a list of dependencies.
+  # https://hexdocs.pm/elixir/List.html
+  # https://hexdocs.pm/mix/Mix.html#module-dependencies
+  # Each item is a Tuple.
+  # https://hexdocs.pm/elixir/Tuple.html
+  # `mix help deps` will show info about dependencies in Mix.  There are
+  # different formats.
   @deps [
     # {:credo, "~> 0.10", only: [:dev, :test]},
     # {:dialyxir, "~> 0.5", only: [:dev, :test]}
+    # {app, requirement, opts}
     {:benchfella, "~> 0.3.0", only: [:dev]},
     {:excoveralls, "~> 0.11.2", only: [:test]},
     {:floki, "~> 0.21", only: [:dev, :test]},
   ]
 
+  # These are heredoc sigils.  Heredocs are multiline strings.  They allow you
+  # to avoid escaping characters.  Sigils are a mechanism in Elixir that allows
+  # the language to be extended.
+  # ~r regex
+  # ~s string
+  # ~c charlist
+  # ~T time
+  # https://elixir-lang.org/getting-started/sigils.html#interpolation-and-escaping-in-string-sigils
   @description """
   Earmark is a pure-Elixir Markdown converter.
 
@@ -25,14 +57,47 @@ defmodule Earmark.Mixfile do
 
   ############################################################
 
+  # Defines a named function in a module.
+  # https://hexdocs.pm/elixir/Kernel.html?#def/2
   def project do
+
+    # :hello is an Atom
+    # https://elixir-lang.org/getting-started/basic-types.html#atoms
+    # {:hello, :dude} is a Tuple with two Atoms
+    # {:hello, "banana"} is a Tuple with an Atom and a BitString
+    #
+    # A keyword list is a list of two-element tuples, where the first elements
+    # are atoms.
+    # There's a special syntax for keyword lists.
+    # [hello: :dude, hello: "banana"] == [{:hello, :dude}, {:hello, "banana"}]
+    #
+    # A keyword list is returned with configuration info for Mix.
+    # https://hexdocs.pm/mix/Mix.Project.html#module-configuration
+    # The values vary a lot and may be determined by various Mix tasks that will
+    # run.
     [
+      # Keys do not need to be unique in keyword lists.
       app: :earmark,
+
+      # Uses the module attribute to kep it DRY.
       version: @version,
+
+      # Versions are parsed with this.
+      # https://hexdocs.pm/elixir/Version.html
       elixir: "~> 1.7",
+
+      # https://hexdocs.pm/mix/Mix.Tasks.Compile.Elixir.html#module-configuration
+      # location of source files
+      # This calls a helper function with the value of the current Mix
+      # environment.
+      # https://hexdocs.pm/mix/Mix.html#env/0
       elixirc_paths: elixirc_paths(Mix.env()),
       escript: escript_config(),
+
+      # Uses the module attribute to kep it DRY.
       deps: @deps,
+
+      # Uses the module attribute to kep it DRY.
       description: @description,
       package: package(),
       preferred_cli_env: [
@@ -78,8 +143,24 @@ defmodule Earmark.Mixfile do
     [main_module: Earmark.CLI]
   end
 
+  # Private function definitions
+  # https://hexdocs.pm/elixir/Kernel.html#defp/2
+  # Functions are described with arity, like elixirc_paths/0.
+  # These have the same arity, so pattern matching is used to figure out which
+  # one is executed.
+  # https://elixirschool.com/en/lessons/basics/functions/#functions-and-pattern-matching
+
+  # When called with :test, return this list of BitStrings.  This is where we
+  # find source in :test mode.
   defp elixirc_paths(:test), do: ["lib", "test/support", "dev"]
+
+  # Look for source in lib, bench, and dev dirs in :dev mode.
   defp elixirc_paths(:dev), do: ["lib", "bench", "dev"]
+
+  # By default, look for source in lib.
+  # _ means we don't care what this value is.  If the function was called with
+  # any value, return this list.  Keep in mind that pattern matching happens
+  # from top to bottom, so the value was not :test or :dev.
   defp elixirc_paths(_), do: ["lib"]
 
   @prerequisites """

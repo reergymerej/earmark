@@ -92,6 +92,10 @@ defmodule Earmark.Mixfile do
       # environment.
       # https://hexdocs.pm/mix/Mix.html#env/0
       elixirc_paths: elixirc_paths(Mix.env()),
+
+      # https://hexdocs.pm/mix/master/Mix.Tasks.Escript.Build.html
+      # Builds an escript.  Escripts can be run on any machine (with Erlang/OTP)
+      # from the command line.
       escript: escript_config(),
 
       # Uses the module attribute to kep it DRY.
@@ -140,6 +144,9 @@ defmodule Earmark.Mixfile do
   end
 
   defp escript_config do
+    # Earmark.CLI is the main module when this is invoked by the CLI.
+    # It will enter at main/1.
+    # lib/earmark/cli.ex
     [main_module: Earmark.CLI]
   end
 

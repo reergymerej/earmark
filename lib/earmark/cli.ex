@@ -1,8 +1,18 @@
 defmodule Earmark.CLI do
 
+  # used to document a module, or not, in this case
+  # https://hexdocs.pm/elixir/writing-documentation.html#module-attributes
   @moduledoc false
 
+  # Entry point for escript.
+  # https://hexdocs.pm/mix/master/Mix.Tasks.Escript.Build.html
+  # Escripts can be installed with mix escript.install.
+  # https://hexdocs.pm/mix/master/Mix.Tasks.Escript.Install.html#content
+  # They can be run with /Users/jeremygreer/.mix/escripts/earmark --help.
   def main(argv) do
+
+    # Pipes argv into each function.
+    # https://elixirschool.com/en/lessons/basics/pipe-operator/
     argv
     |> parse_args
     |> process
@@ -30,19 +40,40 @@ defmodule Earmark.CLI do
 
   @cli_options [:code_class_prefix, :gfm, :smartypants, :pedantic, :pure_links, :breaks, :timeout]
 
+  # private module
   defp parse_args(argv) do
+    # create a keyword list
     switches = [
       help: :boolean,
       version: :boolean
       ]
+    # create a keyword list
     aliases = [
       h: :help,
       v: :version
     ]
 
+    # The result of parse_args/1 is the result of this case.
+    # https://elixir-lang.org/getting-started/case-cond-and-if.html
+    # Evaluate OptionParser.parse(argv, opts \\ [])
+    # https://hexdocs.pm/elixir/OptionParser.html#parse/2
+    # OptionParser is built in.
+
+    # It looks like this gets 3 args, but it only gets two.
+    # > In general, when the keyword list is the last argument of a function,
+    # > the square brackets are optional.
     case OptionParser.parse(argv, switches: switches, aliases: aliases) do
+      # { parsed, args, invalid }
+      # parsed = [{switch_name: value}]
+      # We use pattern matching to see if there was a single option from
+      # "switches" turned on.  If so, the kwl here will have the switch_name as
+      # an atom and a bool true.  We don't care about the other values.
+      # "switch" gets the value of the atom and is returned.
       { [ {switch, true } ],  _, _ } -> switch
+
+      # RESUME
       { options, [ filename ],  _ }  -> {open_file(filename), filename, options}
+
       { options, [ ],           _ }  -> {:stdio, "<no file>", options}
       _                              -> :help
     end

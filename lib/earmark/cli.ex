@@ -71,7 +71,15 @@ defmodule Earmark.CLI do
       # "switch" gets the value of the atom and is returned.
       { [ {switch, true } ],  _, _ } -> switch
 
-      # RESUME
+      # The result is a keyword list of options, assigned "options" and a list
+      # of _other_ values not in our known switches, with a single value.  The
+      # single value is assigned "filename".
+      # OptionParser.parse(
+      #   ["--help", "--no-bork", "otherstuff"],
+      #   switches: [help: :boolean, bork: :boolean]
+      # )
+      # {[help: true, bork: false], ["otherstuff"], []}
+      # From here, we return a tuple of 3, with the result of open_file.
       { options, [ filename ],  _ }  -> {open_file(filename), filename, options}
 
       { options, [ ],           _ }  -> {:stdio, "<no file>", options}
@@ -131,11 +139,40 @@ defmodule Earmark.CLI do
     end
   end
 
+  # Private module, defined in one line.  Doesn't use do/end block.
+  # https://elixir-lang.org/getting-started/case-cond-and-if.html#doend-blocks
+  # File.open/2
+  # https://hexdocs.pm/elixir/File.html#open/2
+  # Open the file and pass the result tuple to io_device, along with the
+  # filename.
   defp open_file(filename), do: io_device(File.open(filename, [:utf8]), filename)
 
+  # This is handling for the various outcomes of opening the file.
+  # OK with an io_device.
+  # An io_device is a type defined by the File module.
+  # https://hexdocs.pm/elixir/File.html#t:io_device/0
+  # https://elixir-lang.org/getting-started/typespecs-and-behaviours.html#defining-custom-types
+  # In this case, just return the io_device.  We don't care what filename this
+  # was called with.
   defp io_device({:ok, io_device}, _), do: io_device
+
+  # Here, File.open failed with the :error atm.  Extract the reason and filename
+  # with pattern matching.
+  # The first arg, the tuple, is provided by the call to File.open.  The
+  # filename was included above after the result to File.open.
   defp io_device({:error, reason}, filename) do
+    # https://hexdocs.pm/elixir/IO.html#puts/2
+    # By default, this writes to :stdio.  Here we tell it to use :stderr.
+    # The 2nd param is an interpolated BitString.
+    # https://elixir-lang.org/getting-started/basic-types.html#strings
+
+    # :file.format_error/1 is a call to the underlying Erlang, used to make a
+    # pretty error message.
+    # http://erlang.org/doc/man/file.html#format_error-1
     IO.puts(:stderr, "#{filename}: #{:file.format_error(reason)}")
+
+    # exit abnormally
+    # https://hexdocs.pm/elixir/Kernel.html#exit/1
     exit(1)
   end
 

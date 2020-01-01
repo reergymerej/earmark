@@ -1,5 +1,8 @@
+# define a module
 defmodule Earmark.Options do
 
+  # use Earmark.Types, allowing it to inject code into this module
+  # lib/earmark/types.ex
   use Earmark.Types
 
   # What we use to render

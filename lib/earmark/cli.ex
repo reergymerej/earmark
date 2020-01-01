@@ -14,7 +14,13 @@ defmodule Earmark.CLI do
     # Pipes argv into each function.
     # https://elixirschool.com/en/lessons/basics/pipe-operator/
     argv
+    # The result of parse_args will either be
+    # a single flag as an atom
+    # {file, filename, options},
+    # {:stdio, "<no file>", options},
+    # or :help.
     |> parse_args
+    # Call "process", with (argv, ...parse_args result)
     |> process
   end
 
@@ -38,6 +44,7 @@ defmodule Earmark.CLI do
 
   """
 
+  # List of atoms used for command line options
   @cli_options [:code_class_prefix, :gfm, :smartypants, :pedantic, :pure_links, :breaks, :timeout]
 
   # private module
@@ -80,16 +87,24 @@ defmodule Earmark.CLI do
       # )
       # {[help: true, bork: false], ["otherstuff"], []}
       # From here, we return a tuple of 3, with the result of open_file.
+      # {io_device, filename, options} are returned here if all went well.
       { options, [ filename ],  _ }  -> {open_file(filename), filename, options}
 
+      # Args were parsed and there was nothing extra seen as filename.  In this
+      # case, we return {:stdio, fake file name, options}
       { options, [ ],           _ }  -> {:stdio, "<no file>", options}
+
+      # By default, just return an atom :help.
       _                              -> :help
     end
   end
 
 
+  # When called with the :help atom
   defp process(:help) do
+    # Put to :stderr the module attribute @args.
     IO.puts(:stderr, @args)
+    # Also put to :stderr the result of option_related_help
     IO.puts(:stderr, option_related_help())
   end
 
@@ -145,6 +160,7 @@ defmodule Earmark.CLI do
   # https://hexdocs.pm/elixir/File.html#open/2
   # Open the file and pass the result tuple to io_device, along with the
   # filename.
+  # If this fails, the process ends.  Otherwise, we get the io_device.
   defp open_file(filename), do: io_device(File.open(filename, [:utf8]), filename)
 
   # This is handling for the various outcomes of opening the file.
@@ -176,18 +192,44 @@ defmodule Earmark.CLI do
     exit(1)
   end
 
+  # private module
   defp option_related_help do
+    # module attribute
     @cli_options
+    # pipe list of atoms into Enum.map
+    # https://hexdocs.pm/elixir/Enum.html#map/2
+    # The 2nd param to Enum.map/2 is a function to run on each item in the
+    # enumerable.  This uses the capture operator, &, to refer to the
+    # specific_option_help/1 function of this module.
+    # https://elixir-lang.org/getting-started/modules-and-functions.html#function-capturing
     |> Enum.map(&specific_option_help/1)
     |> Enum.join("\n")
   end
 
+  # private function, returns a string
   defp specific_option_help(option) do
+    # unixize_option converts atom to CLI option string
+    # %Earmark.Options{} is a Struct.
+    # lib/earmark/options.ex
+    #
+    # Structs can be used as Maps because they're just fancier Maps.
+    # https://elixir-lang.org/getting-started/structs.html#structs-are-bare-maps-underneath
+    #
+    # Map.get/3 gets the value for a key in a map.
+    # https://hexdocs.pm/elixir/Map.html#get/3
+    # The 3rd param is optional and excluded here.
     "      --#{unixize_option(option)} defaults to #{inspect(Map.get(%Earmark.Options{}, option))}"
   end
 
   defp unixize_option(option) do
+    # Takes an option (atom), turns it into a string...
     "#{option}"
+    # pipes that into String.replace/4 skipping optional options.
+    # https://hexdocs.pm/elixir/String.html#replace/4
+    # Returns the atom as a string with s/_/-
+    # We keep the options stored as atoms.  Atoms can't have hyphens.
+    # > Elixir converts switches to underscored atoms, so --source-path becomes
+    # > :source_path.
     |> String.replace("_", "-")
   end
 

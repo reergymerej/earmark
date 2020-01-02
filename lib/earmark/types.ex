@@ -49,6 +49,7 @@ defmodule Earmark.Types do
       # maybe(t) is something with a t, any type, or nil
       # You can see this used in the using module,
       # lib/earmark/options.ex
+      # t is actually defined in the using module, lib/earmark/options.ex
       @type maybe(t) :: t | nil
 
       # a tuple with nil or a string, then a number

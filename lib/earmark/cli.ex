@@ -210,6 +210,7 @@ defmodule Earmark.CLI do
   defp specific_option_help(option) do
     # unixize_option converts atom to CLI option string
     # %Earmark.Options{} is a Struct.
+    # https://hexdocs.pm/elixir/Kernel.SpecialForms.html#%2525/2
     # lib/earmark/options.ex
     #
     # Structs can be used as Maps because they're just fancier Maps.

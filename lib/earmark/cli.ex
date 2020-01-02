@@ -24,6 +24,7 @@ defmodule Earmark.CLI do
     |> process
   end
 
+  # This is a module attribute used to print help info.
   @args """
   usage:
 
@@ -194,8 +195,10 @@ defmodule Earmark.CLI do
 
   # private module
   defp option_related_help do
+
     # module attribute
     @cli_options
+
     # pipe list of atoms into Enum.map
     # https://hexdocs.pm/elixir/Enum.html#map/2
     # The 2nd param to Enum.map/2 is a function to run on each item in the
@@ -203,22 +206,33 @@ defmodule Earmark.CLI do
     # specific_option_help/1 function of this module.
     # https://elixir-lang.org/getting-started/modules-and-functions.html#function-capturing
     |> Enum.map(&specific_option_help/1)
+    # Joins each enumerable, in this case, the line of text describing option,
+    # with a newline.
+    # https://hexdocs.pm/elixir/Enum.html#join/2
     |> Enum.join("\n")
   end
 
   # private function, returns a string
   defp specific_option_help(option) do
     # unixize_option converts atom to CLI option string
-    # %Earmark.Options{} is a Struct.
+    # %Earmark.Options{} is a Struct.  Structs are like Maps, but with compile
+    # time type checking and default values.
     # https://hexdocs.pm/elixir/Kernel.SpecialForms.html#%2525/2
     # lib/earmark/options.ex
     #
     # Structs can be used as Maps because they're just fancier Maps.
     # https://elixir-lang.org/getting-started/structs.html#structs-are-bare-maps-underneath
+    # %Earmark.Options{} returns the Struct.  Them Map.get/3 pulls the option.
     #
     # Map.get/3 gets the value for a key in a map.
     # https://hexdocs.pm/elixir/Map.html#get/3
     # The 3rd param is optional and excluded here.
+    #
+    # inspect stringifies an element.
+    # https://hexdocs.pm/elixir/Inspect.html
+    #
+    # Altogether, this shows the option with - instead of _ and prints the
+    # pretty default based on the %Earmark.Options{} struct's defaults.
     "      --#{unixize_option(option)} defaults to #{inspect(Map.get(%Earmark.Options{}, option))}"
   end
 

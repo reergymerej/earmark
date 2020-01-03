@@ -109,7 +109,10 @@ defmodule Earmark.CLI do
     IO.puts(:stderr, option_related_help())
   end
 
+  # When process is passed the :version atom...
   defp process(:version) do
+    # Print the result of Earmark.version()
+    # lib/earmark.ex
     IO.puts( Earmark.version() )
   end
 

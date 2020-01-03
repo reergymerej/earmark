@@ -292,7 +292,7 @@ defmodule Earmark do
   - description of the error
 
 
-  `options` can be an `%Earmark.Options{}` structure, or can be passed in as a `Keyword` argument (with legal keys for `%Earmark.Options` 
+  `options` can be an `%Earmark.Options{}` structure, or can be passed in as a `Keyword` argument (with legal keys for `%Earmark.Options`
 
   * `renderer`: ModuleName
 
@@ -337,7 +337,7 @@ defmodule Earmark do
   * `pure_links`: boolean
 
     Pure links of the form `~r{\\bhttps?://\\S+\\b}` are rendered as links from now on.
-    However, by setting the `pure_links` option to `false` this can be disabled and pre 1.4 
+    However, by setting the `pure_links` option to `false` this can be disabled and pre 1.4
     behavior can be used.
   """
   def as_html(lines, options \\ %Options{})
@@ -367,7 +367,7 @@ defmodule Earmark do
         iex(9)> markdown = "My `code` is **best**"
         ...(9)> {:ok, ast, []} = Earmark.as_ast(markdown)
         ...(9)> ast
-        [{"p", [], ["My ", {"code", [{"class", "inline"}], ["code"]}, " is ", {"strong", [], ["best"]}]}] 
+        [{"p", [], ["My ", {"code", [{"class", "inline"}], ["code"]}, " is ", {"strong", [], ["best"]}]}]
 
   Options are passes like to `as_html`, some do not have an effect though (e.g. `smartypants`) as formatting and escaping is not done
   for the AST.
@@ -384,7 +384,7 @@ defmodule Earmark do
   We also do return a list for a single node
 
 
-        Floki.parse("<!-- comment -->")           
+        Floki.parse("<!-- comment -->")
         {:comment, " comment "}
 
         Earmark.as_ast("<!-- comment -->")
@@ -448,12 +448,34 @@ defmodule Earmark do
     Earmark.AstRenderer.render(blocks, context)
   end
 
+  # Documentation for this function, uses heredoc.
+  # https://hexdocs.pm/elixir/writing-documentation.html#module-attributes
   @doc """
     Accesses current hex version of the `Earmark` application. Convenience for
     `iex` usage.
   """
   def version() do
+    # with is a special form that combines clauses.  If all clauses match, the
+    # do block is executed.  In this case, there's only one caluse.
+    # https://hexdocs.pm/elixir/Kernel.SpecialForms.html?#with/1
+
+    # :application is defined by OTP.
+    # http://erlang.org/doc/man/application.html
+    # iex(1)> i :application
+    # Term
+    #   :application
+    # Data type
+    #   Atom
+    # Module bytecode
+    #   /usr/local/Cellar/erlang/22.1.8/lib/erlang/lib/kernel-6.5/ebin/application.beam
+    # :application.get_key/2 gets an app value at runtime.
+    # The application was defined in mix.exs as was :vsn.
+    # This is a standard way of fetching the version.
+    # https://github.com/elixir-lang/elixir/blob/master/lib/elixir/lib/application.ex#L662
     with {:ok, version} = :application.get_key(:earmark, :vsn),
+      # converts to string using String.Chars protocol
+      # https://hexdocs.pm/elixir/String.Chars.html
+      # https://hexdocs.pm/elixir/Kernel.html#to_string/1
       do: to_string(version)
   end
 

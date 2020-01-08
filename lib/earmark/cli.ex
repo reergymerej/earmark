@@ -183,6 +183,11 @@ defmodule Earmark.CLI do
     }
   end
 
+  # Familiar pattern of defining the function to accept the enum, and the
+  # function that maps each item in its own function.
+  # private method
+  # single line defp, do
+  # https://hexdocs.pm/elixir/Kernel.html#defp/2
   defp numberize_options(keywords, option_names), do: Enum.map(keywords, &numberize_option(&1, option_names))
   defp numberize_option({k, v}, option_names) do
     if Enum.member?(option_names, k) do

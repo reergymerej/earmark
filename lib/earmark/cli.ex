@@ -28,13 +28,13 @@ defmodule Earmark.CLI do
   @args """
   usage:
 
-     earmark --help
-     earmark --version
-     earmark [ options... <file> ]
+  earmark --help
+  earmark --version
+  earmark [ options... <file> ]
 
   convert file from Markdown to HTML.
 
-     where options can be any of:
+  where options can be any of:
        --code-class-prefix <a prefix>
        --gfm
        --smartypants
@@ -43,7 +43,7 @@ defmodule Earmark.CLI do
        --breaks
        --timeout <timeout in ms>
 
-  """
+       """
 
   # List of atoms used for command line options
   @cli_options [:code_class_prefix, :gfm, :smartypants, :pedantic, :pure_links, :breaks, :timeout]
@@ -54,7 +54,7 @@ defmodule Earmark.CLI do
     switches = [
       help: :boolean,
       version: :boolean
-      ]
+    ]
     # create a keyword list
     aliases = [
       h: :help,
@@ -85,7 +85,7 @@ defmodule Earmark.CLI do
       # OptionParser.parse(
       #   ["--help", "--no-bork", "otherstuff"],
       #   switches: [help: :boolean, bork: :boolean]
-      # )
+        # )
       # {[help: true, bork: false], ["otherstuff"], []}
       # From here, we return a tuple of 3, with the result of open_file.
       # {io_device, filename, options} are returned here if all went well.
@@ -116,9 +116,24 @@ defmodule Earmark.CLI do
     IO.puts( Earmark.version() )
   end
 
+  # process may also get this tuple.  This is not obvious, since the results
+  # come indirectly from parse_args.
   defp process({io_device, filename, options}) do
+    # match operator binds to "options"
+    #
+    # struct updates a struct
+    # https://hexdocs.pm/elixir/Kernel.html#struct/2
+    #
+    # Earmark.Options is our base struct
+    # lib/earmark/options.ex
+    #
+    # Get the list of fields - two-element tuples (key-value pairs) - to update
+    # the base struct will come from this chain
+    #   booleanify
+    #   numberize_options
+    #   add_filename
     options = struct(Earmark.Options,
-                 booleanify(options) |> numberize_options([:timeout]) |> add_filename(filename))
+      booleanify(options) |> numberize_options([:timeout]) |> add_filename(filename))
 
     content = IO.stream(io_device, :line) |> Enum.to_list
     Earmark.as_html!(content, options)
@@ -126,18 +141,43 @@ defmodule Earmark.CLI do
   end
 
   defp add_filename(options, filename),
-    do: [{:file, filename} | options]
+  do: [{:file, filename} | options]
 
 
+  # for each keyword, replace with the result of running it through booleanify_option
+  # https://hexdocs.pm/elixir/Enum.html#map/2
+  # Use the capture operator to avoid defining this inline
   defp booleanify( keywords ), do: Enum.map(keywords, &booleanify_option/1)
+
+  # for a 2-element tuple
+  # assign k and v
+  # return another 2-element tuple
   defp booleanify_option({k, v}) do
+
+    # don't mess with k
     {k,
-     case Map.get %Earmark.Options{}, k, :does_not_exist do
+
+    # Pull value k from the options struct, default atom :does_not_exist.
+    # https://hexdocs.pm/elixir/Map.html#get/3
+    # lib/earmark/options.ex
+
+    # omitting optional ()
+    # This does not seem to be typical.
+    # https://github.com/christopheradams/elixir_style_guide#parentheses
+      case Map.get %Earmark.Options{}, k, :does_not_exist do
+
+         # If the value was found, return the v value as a boolean.
         true  -> if v == "false", do: false, else: true
         false -> if v == "false", do: false, else: true
+
+        # If not found,
         :does_not_exist ->
+         # log a warning
           IO.puts( :stderr, "ignoring unsupported option #{inspect k}")
+         # return the original v
           v
+
+       # The option was found but not true/false.
         _     -> v
       end
     }
@@ -149,12 +189,12 @@ defmodule Earmark.CLI do
       case Integer.parse(v) do
         {int_val, ""}   -> {k, int_val}
         {int_val, rest} -> IO.puts(:stderr, "Warning, non numerical suffix in option #{k} ignored (#{inspect rest})")
-                           {k, int_val}
+          {k, int_val}
         :error          -> IO.puts(:stderr, "ERROR, non numerical value #{v} for option #{k} ignored, value is set to nil")
-                           {k, nil}
+          {k, nil}
       end
     else
-      {k, v}
+        {k, v}
     end
   end
 
@@ -237,11 +277,11 @@ defmodule Earmark.CLI do
     # Altogether, this shows the option with - instead of _ and prints the
     # pretty default based on the %Earmark.Options{} struct's defaults.
     "      --#{unixize_option(option)} defaults to #{inspect(Map.get(%Earmark.Options{}, option))}"
-  end
+      end
 
-  defp unixize_option(option) do
+      defp unixize_option(option) do
     # Takes an option (atom), turns it into a string...
-    "#{option}"
+      "#{option}"
     # pipes that into String.replace/4 skipping optional options.
     # https://hexdocs.pm/elixir/String.html#replace/4
     # Returns the atom as a string with s/_/-
@@ -249,8 +289,8 @@ defmodule Earmark.CLI do
     # > Elixir converts switches to underscored atoms, so --source-path becomes
     # > :source_path.
     |> String.replace("_", "-")
-  end
+      end
 
-end
+      end
 
 # SPDX-License-Identifier: Apache-2.0

@@ -188,17 +188,55 @@ defmodule Earmark.CLI do
   # private method
   # single line defp, do
   # https://hexdocs.pm/elixir/Kernel.html#defp/2
+  # The capture operator here is NOT referencing numberize_option.  It's
+  # creating an anonymous function.  Inside the anonymous function, it calls
+  # numberize_option with whatever the first value was sent into it (the anon
+  # func).
+  # https://hexdocs.pm/elixir/Function.html
   defp numberize_options(keywords, option_names), do: Enum.map(keywords, &numberize_option(&1, option_names))
   defp numberize_option({k, v}, option_names) do
+    # https://hexdocs.pm/elixir/Enum.html?#member?/2
+    # Predicate functions (booleans) that CANNOT be used in guards should have
+    # ...? instead of is_.....
+    # https://github.com/christopheradams/elixir_style_guide#naming
     if Enum.member?(option_names, k) do
+
+      # Parse the the value from the keyword, base 10 by default.
+      # https://hexdocs.pm/elixir/Integer.html?#parse/2
       case Integer.parse(v) do
+        # iex(5)> Integer.parse("bananas")
+        # :error
+        # iex(6)> Integer.parse("10 bananas")
+        # {10, " bananas"}
+        # iex(7)> Integer.parse("10.7 bananas")
+        # {10, ".7 bananas"}
+        # iex(8)> Integer.parse("10.7 bananas", 2)
+        # {2, ".7 bananas"}
+        # iex(9)> Integer.parse("10.7 bananas", 1)
+        # ** (ArgumentError) invalid base 1
+        #     (elixir) lib/integer.ex:233: Integer.parse/2
+
+        # Parsed OK, empty remainder
+        # Return keyword with parsed value.
         {int_val, ""}   -> {k, int_val}
+
+        # Parsed OK, some sort of remainder text.
+        # Warn in :stderr, use inspect without () to show the remaining unparsed
+        # text.
+        # https://hexdocs.pm/elixir/Kernel.html?#inspect/2
         {int_val, rest} -> IO.puts(:stderr, "Warning, non numerical suffix in option #{k} ignored (#{inspect rest})")
+          # Return keyword with parsed value.
           {k, int_val}
+
+        # This is the only other possible result from Integer.parse/2.
+        # Log the error to :stderr.
+        # Return the keyword and a nil value instead.
         :error          -> IO.puts(:stderr, "ERROR, non numerical value #{v} for option #{k} ignored, value is set to nil")
           {k, nil}
       end
     else
+        # the options names don't include k
+        # just return the keyword
         {k, v}
     end
   end
